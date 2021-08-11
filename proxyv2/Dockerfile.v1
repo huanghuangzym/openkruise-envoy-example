@@ -1,0 +1,32 @@
+FROM istio/proxyv2:1.10.3
+
+#COPY --chown=istio-proxy:root envoy_bootstrap_v2.json /var/lib/istio/envoy/envoy_bootstrap_tmpl.json
+#COPY --chown=istio-proxy:root gcp_envoy_bootstrap.json /var/lib/istio/envoy/gcp_envoy_bootstrap_tmpl.json
+
+ARG proxy_version=1.10.3-hl
+ARG istio_version=1.10.3-hl
+
+
+RUN apt-get update && apt-get install -y vim
+
+#COPY envoy_policy.yaml.tmpl /var/lib/istio/envoy/envoy_policy.yaml.tmpl
+
+COPY envoy_bootstrap.json /var/lib/istio/envoy/envoy_bootstrap_tmpl.json
+
+
+
+RUN  rm -rf /usr/local/bin/pilot-agent
+#RUN  rm -rf /usr/local/bin/envoy
+
+COPY pilot-agent-v1 /usr/local/bin/pilot-agent
+#COPY envoy /usr/local/bin/envoy
+
+
+COPY migrate.sh /usr/local/bin/migrate.sh
+
+
+# Environment variable indicating the exact proxy sha - for debugging or version-specific configs
+ENV ISTIO_META_ISTIO_PROXY_SHA $proxy_version
+# Environment variable indicating the exact build, for debugging
+ENV ISTIO_META_ISTIO_VERSION $istio_version
+
